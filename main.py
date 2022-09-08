@@ -3,6 +3,11 @@ from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 
 DC = ["worcester.html", "berkshire.html", "franklin.html", "hampshire.html"]
+urls = ["https://umassdining.com/locations-menus/worcester/menu",
+        "https://umassdining.com/locations-menus/berkshire/menu",
+        "https://umassdining.com/locations-menus/franklin/menu",
+        "https://umassdining.com/locations-menus/hampshire/menu"]
+
 worcesterMenu = ["worcesterbreakfast.txt",
                  "worcesterlunch.txt",
                  "worcesterdinner.txt"]
@@ -20,9 +25,9 @@ menuType = ["breakfast_menu", "lunch_menu", "dinner_menu"]
 currMenu = []
 url = "https://umassdining.com/locations-menus/worcester/menu"
 
-# path = "C:\Program Files (x86)\chromedriver.exe"
-# s = Service(path)
-# driver = webdriver.Chrome(service=s)
+path = "C:\Program Files (x86)\chromedriver.exe"
+s = Service(path)
+driver = webdriver.Chrome(service=s)
 # driver.get(url)
 
 # html = driver.page_source
@@ -43,25 +48,31 @@ hampshireDinner = []
 finalFoodItems = [worcesterBreakfast, worcesterLunch, worcesterDinner, berkshireBreakfast, berkshireLunch,
                   berkshireDinner, franklinBreakfast, franklinLunch, franklinDinner, hampshireBreakfast, hampshireLunch,
                   hampshireDinner]
-for x in DC:
-    # Local version of dining page
-    with open(x) as temphtml:
-        soup = BeautifulSoup(temphtml, "html.parser")
+page_sources = []
+for x in urls:
+    driver.get(x)
+    html = driver.page_source
+    page_sources.append(html)
 
-    if x == "worcester.html":
+cc = 0
+for x in page_sources:
+    #with open(x) as temphtml:
+    soup = BeautifulSoup(x, "html.parser")
+    if cc == 0:
         currMenu = worcesterMenu
-    elif x == "berkshire.html":
+    elif cc == 1:
         currMenu = berkshireMenu
-    elif x == "franklin.html":
+    elif cc == 2:
         currMenu = franklinMenu
-    elif x == "hampshire.html":
+    elif cc == 3:
         currMenu = hampshireMenu
+    cc += 1
 
     countType = 0
-    for placeholder in currMenu:
+    for hall in currMenu:
         elements = soup.find_all(id=menuType[countType])
 
-        with open("%s" % placeholder, "w") as outfile:
+        with open("%s" % hall, "w") as outfile:
             for item in elements:
                 outfile.write("%s\n" % item)
 
@@ -75,14 +86,13 @@ for x in DC:
         currentFoodStr = ""
         currentTitleStr = ""
         currentTitle = ""
+        currCategory = ""
+        currFood = ""
         quoteCount = 0
         x = 0
         y = 0
 
-        currCategory = ""
-        currFood = ""
-
-        with open("%s" % placeholder, "r") as f:
+        with open("%s" % hall, "r") as f:
             while True:
                 c = f.read(1)
                 if not c:
